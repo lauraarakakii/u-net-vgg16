@@ -1,8 +1,3 @@
-# =============================================================================
-# Baseado no artigo: Creating a Very Simple U-Net Model with PyTorch for Semantic Segmentation of Satellite Images
-# Autor: Maurício Cordeiro
-# Link: https://medium.com/analytics-vidhya/creating-a-very-simple-u-net-model-with-pytorch-for-semantic-segmentation-of-satellite-images-223aa216e705
-# =============================================================================
 
 # Importa as bibliotecas necessárias
 # =============================================================================
