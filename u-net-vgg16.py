@@ -1,3 +1,8 @@
+# =============================================================================
+# Baseado no artigo: Creating a Very Simple U-Net Model with PyTorch for Semantic Segmentation of Satellite Images
+# Autor: Maurício Cordeiro
+# Link: https://medium.com/analytics-vidhya/creating-a-very-simple-u-net-model-with-pytorch-for-semantic-segmentation-of-satellite-images-223aa216e705
+# =============================================================================
 
 # Importa as bibliotecas necessárias
 # =============================================================================
@@ -224,14 +229,22 @@ class CloudDatasetTest(Dataset):
 # Modelo simplificado da UNET. Presente no tutorial:
 # Creating a Very Simple U-Net Model with PyTorch for Semantic Segmentation of Satellite Images
 
+pretrained_net = models.resnet50(pretrained=False)
 
-class UNetVgg(torch.nn.Module):
+class unetvgg(torch.nn.Module):
 
     def __init__(self, nClasses):
-        super(UNetVgg, self).__init__()
+        super(unetvgg, self).__init__()
 
         vgg16pre = torchvision.models.vgg16(pretrained=True)
-        self.vgg0 = torch.nn.Sequential(*list(vgg16pre.features.children())[:4])
+        self.vgg0 = torch.nn.Sequential(
+            torch.nn.Conv2d(4, 64, kernel_size=(3, 3), stride=1, padding=(1, 1)),
+            torch.nn.ReLU(True),
+            torch.nn.Conv2d(64, 64, kernel_size=(3, 3), stride=1, padding=(1, 1)),
+            torch.nn.ReLU(True)
+        )
+
+
         self.vgg1 = torch.nn.Sequential(*list(vgg16pre.features.children())[4:9])
         self.vgg2 = torch.nn.Sequential(*list(vgg16pre.features.children())[9:16])
         self.vgg3 = torch.nn.Sequential(*list(vgg16pre.features.children())[16:23])
@@ -281,6 +294,7 @@ class UNetVgg(torch.nn.Module):
         self.final = torch.nn.Conv2d(64, nClasses, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
+
         feat0 = self.vgg0(x)
         feat1 = self.vgg1(feat0)
         feat2 = self.vgg2(feat1)
@@ -319,15 +333,12 @@ class UNetVgg(torch.nn.Module):
 # Implementação simplifada da rede FCN
 # Disponível em: https://discuss.pytorch.org/t/problem-with-training-fcn-for-segmentation-of-multi-channel-data/69982/2
 
-# ***** Descomentar a resnet50 para usar na 1080. Utilizei uma resnet18 para poder rodar na 1050 *****
 
-pretrained_net = models.resnet50(pretrained=False)
-### pretrained_net = models.resnet18(pretrained=False)
-
+"""
 class fcn(nn.Module):
-    """
+    
     https://discuss.pytorch.org/t/problem-with-training-fcn-for-segmentation-of-multi-channel-data/69982/2
-    """
+    
     def __init__(self, in_channels, num_classes):
         super(fcn, self).__init__()
         self.stage1 = nn.Sequential(*list(pretrained_net.children())[:-4])
@@ -366,7 +377,7 @@ class fcn(nn.Module):
         s = s1 + s2
         s = self.upsample_8x(s2)
         return s
-
+"""
 
 def train(model, train_dl, valid_dl, loss_fn, optimizer, acc_fn, epochs=50):
     """
@@ -585,7 +596,7 @@ test_path = Path('../Data/38-Cloud_test')
 # Usamos o Dataset adaptado para o conjunto de testes (ignora as imagens gt).
 test_ds = CloudDatasetTest(test_path/'test_red', 
                            test_path/'test_green', 
-                           test_path/'test_blue', 
+                           test_path/'test_blue',
                            test_path/'test_nir')
 
 # O conjunto de testes deve ter shuffle=False
@@ -593,23 +604,27 @@ test_dl2 = DataLoader(test_ds, batch_size=hp_batch_size, shuffle=False)
 
 
 # ***** Escolha o modelo *****
-MODEL = 'FCN'  # ou 'FCN'
+# MODEL = 'FCN'  # ou 'FCN'
+MODEL = 'UNETVGG'
 
 # Cria uma instância do modelo
 # =============================================================================
-if MODEL == 'UNET':
-    # A imagem de entrada tem 4 canais (red, green, blue, nir). 
+if MODEL == 'UNETVGG':
+    modelo = unetvgg(5)
+    print(modelo)
+
+#if MODEL == 'UNET':
+    # A imagem de entrada tem 4 canais (red, green, blue, nir).
     # A imagem de saída tem 2 canais (fundo (0), nuvem (1))
-    modelo = UNET(4, 2)
+    #modelo = UNET(4, 2)
 
 # from my_fcn import MyFCN
 # unet = MyFCN(4, 2)
 # print(unet)
 
-else:
-    modelo = fcn(4, 2)
+#else:
+ #   modelo = fcn(4, 2)
 
-print(modelo)
 
 # Treina o modelo
 # -----------------------------------------------------------------------------
@@ -678,7 +693,7 @@ exp_file.close()
 print('\nTesting model...')
 
 # Obs.: Pode ser implementado em uma função...
-### test_loss = test(modelo, test_dl, loss_fn, opt, acc_metric, epochs=1)
+### test_loss = test(modelo, test_dl, loss_fn, opt, acc_metric, epochs=50)
 
 modelo_trained.train(False)  # Set model to evaluate mode
 
