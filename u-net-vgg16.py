@@ -62,9 +62,9 @@ print('\nDevice: {0}'.format(DEVICE))
 # Reunir os hiperparametros aqui.
 # =============================================================================
 # Número de épocas que o modelo será treinado.
-num_epochs = 50 # 50 epochs (original)
+num_epochs = 2 # 50 epochs (original)
 # Taxa de aprendizado
-hp_lr = 0.01
+hp_lr = 0.001
 # Tamanho do lote
 hp_batch_size = 12
 
@@ -237,13 +237,13 @@ class unetvgg(torch.nn.Module):
         super(unetvgg, self).__init__()
 
         vgg16pre = torchvision.models.vgg16(pretrained=True)
+
         self.vgg0 = torch.nn.Sequential(
             torch.nn.Conv2d(4, 64, kernel_size=(3, 3), stride=1, padding=(1, 1)),
             torch.nn.ReLU(True),
             torch.nn.Conv2d(64, 64, kernel_size=(3, 3), stride=1, padding=(1, 1)),
             torch.nn.ReLU(True)
         )
-
 
         self.vgg1 = torch.nn.Sequential(*list(vgg16pre.features.children())[4:9])
         self.vgg2 = torch.nn.Sequential(*list(vgg16pre.features.children())[9:16])
@@ -379,7 +379,7 @@ class fcn(nn.Module):
         return s
 """
 
-def train(model, train_dl, valid_dl, loss_fn, optimizer, acc_fn, epochs=50):
+def train(model, train_dl, valid_dl, loss_fn, optimizer, acc_fn, epochs=2):
     """
     Função que implementa o laço de treinamento do modelo. 
     Itera ao longo do número de épocas definico (epochs)
