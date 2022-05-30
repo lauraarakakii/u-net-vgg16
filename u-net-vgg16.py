@@ -226,8 +226,6 @@ class CloudDatasetTest(Dataset):
 
 # The model
 # =============================================================================
-# Modelo simplificado da UNET. Presente no tutorial:
-# Creating a Very Simple U-Net Model with PyTorch for Semantic Segmentation of Satellite Images
 
 pretrained_net = models.resnet50(pretrained=False)
 
