@@ -64,7 +64,7 @@ print('\nDevice: {0}'.format(DEVICE))
 # Número de épocas que o modelo será treinado.
 num_epochs = 2 # 50 epochs (original)
 # Taxa de aprendizado
-hp_lr = 0.001
+hp_lr = 0.00001
 # Tamanho do lote
 hp_batch_size = 12
 
